@@ -1,0 +1,16 @@
+Pre-processing the data
+	-Normalize the features
+	  -Scale the features
+	  -Flip the data such that it is all going in the same direction
+	-Randomly pick top X features based off of feature importance.
+	-Pick a subset of features based off of our intuition
+	-Say F**k it and just run the models on ALL THE FEATURES
+	  -We'll compare these three later once we have the results.
+Four Regression Models
+	-Linear (Suraj)
+	  -The linear model will be our baseline to judge the effectiveness of each other model off of.
+	-Random Forests (Kyle)
+	-Adaboost (Avi)
+	-Neural Net (Billy)
+Presentation:
+	-Follow the format of the project proposal.
