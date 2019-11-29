@@ -5,6 +5,7 @@ from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import AdaBoostClassifier
 
 # Make sure to download the data from Kaggle before running:
 # https://www.kaggle.com/c/nfl-big-data-bowl-2020/data
@@ -63,7 +64,18 @@ def random_forest():
     rf.fit(train_data, train_labels)
     end = time.time()
     print("Time to fit: " + str(end-start))
-	return rf
+    return rf
+
+## AVI ##
+def adaboost(X_train, y_train):
+    #Set up the adaboost model
+    print("Fitting...")
+    abc = AdaBoostClassifier(n_estimators = 100, learning_rate = 1.0)
+    start = time.time()
+    abc.fit(train_data, train_labels)
+    end = time.time()
+    print("Time to fit: " + str(end-start))
+    return abc
 
 def train_my_model(train_df):
 
@@ -71,12 +83,13 @@ def train_my_model(train_df):
 	features = [col for col in train_df.columns if col != 'Yards']
 	X = train_df[features]
 	y = train_df['Yards']
-	X_train, X_test, y_train, y_test = train_test_split(train_df[features], train_df['Yards'])
+	X_train, X_test, y_train, y_test = train_test_split(train_df[features], train_df['Yards'])    
 
 
 	## AVIs MODEL --> ADABOOST ##
+    adaboost_model = adaboost(X_train, y_train)
 
-	## BILLYs MODEL -->  NEURAL BOI ##
+    ## BILLYs MODEL -->  NEURAL BOI ##
 
 	## KYLEs MODEL --> RANDY FOREST ##
 	forest_model = random_forest(X_train, y_train)
@@ -88,7 +101,7 @@ def train_my_model(train_df):
 	###### ----------------------------------- ##########
 
 	#each one of us will return a model
-	return (linreg,forest_model)
+	return (linreg, forest_model, adaboost_model)
 
 def make_my_predictions(test_df, sample_prediction_df):
 	#
