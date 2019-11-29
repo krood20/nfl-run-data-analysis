@@ -25,7 +25,7 @@ def preprocess(df):
 		if df[col].dtype == 'object':
 			df[col] = pd.factorize(df[col])[0]
 	df = df.dropna()
-	
+
 	x = list(df.columns)
 	x.remove('Yards')
 	x.remove('GameId')
@@ -54,6 +54,16 @@ def preprocess(df):
 
 	return df[top_features]
 
+## KYLE ##
+def random_forest():
+    #set up our Forest
+    print("Fitting...")
+    rf = RandomForestClassifier()
+    start = time.time()
+    rf.fit(train_data, train_labels)
+    end = time.time()
+    print("Time to fit: " + str(end-start))
+	return rf
 
 def train_my_model(train_df):
 
@@ -69,6 +79,7 @@ def train_my_model(train_df):
 	## BILLYs MODEL -->  NEURAL BOI ##
 
 	## KYLEs MODEL --> RANDY FOREST ##
+	forest_model = random_forest(X_train, y_train)
 
 	## SURAJs MODEL --> LINEAR ##
 	X_train = StandardScaler().fit_transform(X_train)
@@ -77,7 +88,7 @@ def train_my_model(train_df):
 	###### ----------------------------------- ##########
 
 	#each one of us will return a model
-	return linreg
+	return (linreg,forest_model)
 
 def make_my_predictions(test_df, sample_prediction_df):
 	#
@@ -92,8 +103,7 @@ df = pd.read_csv('../nfl-big-data-bowl-2020/train.csv', low_memory=False)
 
 train_df = preprocess(df[:100])
 
-linreg = train_my_model(train_df[:100])
-
+linreg, forest_model = train_my_model(train_df[:100])
 
 
 # for (test_df, sample_prediction_df) in env.iter_test():
