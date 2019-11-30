@@ -27,9 +27,9 @@ from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
 
 def build_neural_net_model(dataset):
   model = keras.Sequential([
-    layers.Dense(64, activation='relu', input_shape=[len(dataset.keys())]),
-    layers.Dense(64, activation='relu'),
-    layers.Dense(1)
+	layers.Dense(64, activation='relu', input_shape=[len(dataset.keys())]),
+	layers.Dense(64, activation='relu'),
+	layers.Dense(1)
   ])
   model.compile(loss='mse', optimizer=tf.keras.optimizers.RMSprop(0.001), metrics=['mae', 'mse'])
   return model
@@ -70,8 +70,8 @@ def preprocess(df):
 
 	##################################### feature selection V2, intuition #####################################
 	top_features = ['S', 'A', 'Orientation', 'Dir', 'NflId', 'YardLine', 'Down',
-	    'Distance', 'OffenseFormation', 'OffensePersonnel', 'DefendersInTheBox',
-	     'DefensePersonnel', 'PlayerHeight', 'PlayerWeight', 'PlayerBirthDate', 'Yards']
+		'Distance', 'OffenseFormation', 'OffensePersonnel', 'DefendersInTheBox',
+		'DefensePersonnel', 'PlayerHeight', 'PlayerWeight', 'PlayerBirthDate', 'Yards']
 
 
 	######################################## feature selection V3, all ########################################
@@ -119,33 +119,60 @@ def neural_net(X_train, y_train, X_test, y_test):
 
 ## KYLE ##
 def random_forest(X_train, y_train):
-    #set up our Forest
-    print("Fitting...")
-    rf = RandomForestRegressor(n_estimators = 100)
-    start = time.time()
-    rf.fit(X_train, y_train)
-    end = time.time()
-    print("Time to fit: " + str(end-start))
-    return rf
+	#set up our Forest
+	print("Fitting...")
+	rf = RandomForestRegressor(n_estimators = 100)
+	start = time.time()
+	rf.fit(X_train, y_train)
+	end = time.time()
+	print("Time to fit: " + str(end-start))
+	return rf
 
 ## AVI ##
 def adaboost(X_train, y_train):
-    #Set up the adaboost model
-    print("Fitting...")
-    abc = AdaBoostRegressor(n_estimators = 100, learning_rate = 1.0)
-    start = time.time()
-    abc.fit(X_train, y_train)
-    end = time.time()
-    print("Time to fit: " + str(end-start))
-    return abc
+	#Set up the adaboost model
+	print("Fitting...")
+	abc = AdaBoostRegressor(n_estimators = 100, learning_rate = 1.0)
+	start = time.time()
+	abc.fit(X_train, y_train)
+	end = time.time()
+	print("Time to fit: " + str(end-start))
+	return abc
+
+
+## SURAJ ##
+def linear_regression(X_train, y_train, X_test, y_test):
+	print("Fitting...")
+	linreg = LinearRegression().fit(X_train, y_train)
+	test_predictions = linreg.predict(X_test).flatten()
+	
+	print(test_predictions)
+
+	# a = plt.axes(aspect='equal')
+	# plt.scatter(y_test, test_predictions)
+	# plt.xlabel('True Values')
+	# plt.ylabel('Predictions')
+	# lims = [0, 50]
+	# plt.xlim(lims)
+	# plt.ylim(lims)
+	# plt.plot(lims, lims)
+	# plt.show()
+	
+	# error = test_predictions - y_test
+	# plt.hist(error, bins = 25)
+	# plt.xlabel("Prediction Error")
+	# plt.ylabel("Count")
+	# plt.show()
+
+	return linreg
+
 
 def train_my_model(train_df):
 
 	# cross validation split
-	y = train_df.pop('Yards')
 	X = train_df
+	y = train_df.pop('Yards')
 	X_train, X_test, y_train, y_test = train_test_split(X, y)
-
 
 	## AVIs MODEL --> ADABOOST ##
 	adaboost_model = adaboost(X_train, y_train)
@@ -157,13 +184,10 @@ def train_my_model(train_df):
 	forest_model = random_forest(X_train, y_train)
 
 	## SURAJs MODEL --> LINEAR ##
-	X_train = StandardScaler().fit_transform(X_train)
-	linreg = LinearRegression().fit(X_train, y_train)
-
-	###### ----------------------------------- ##########
+	linreg_model = linear_regression(X_train, y_train, X_test, y_test)
 
 	#each one of us will return a model
-	return (linreg, forest_model, adaboost_model, neural_net_model)
+	return (linreg_model, forest_model, adaboost_model, neural_net_model)
 
 def make_my_predictions(test_df, sample_prediction_df):
 	#
@@ -178,8 +202,7 @@ df = pd.read_csv('../nfl-big-data-bowl-2020/train.csv', low_memory=False)
 
 train_df = preprocess(df)
 
-linreg, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
-
+linreg_model, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
 
 # for (test_df, sample_prediction_df) in env.iter_test():
 #   predictions_df = make_my_predictions(test_df, sample_prediction_df)
