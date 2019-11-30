@@ -1,4 +1,5 @@
 import time
+import re
 
 # from kaggle.competitions import nflrush
 import matplotlib.pyplot as plt
@@ -40,15 +41,25 @@ def preprocess(df):
 	# originally has data for every player during every play, in the intrest of simplicity use only info about the rusher
 	df = df.loc[df['NflId'] == df['NflIdRusher']]
 	df = df.dropna()
+	df = df.reset_index(drop=True)
 
+	# convert player height to inches
+	df['PlayerHeight'] = df['PlayerHeight'].apply(lambda x : int(re.search("[^-]+", x).group()) * 12 + int(re.search("[^-]*$", x).group()))
+
+	# fix inconsistent team abreviations between possesion team and home/away team
+	df.loc[df['PossessionTeam'] == 'BLT', 'PossessionTeam'] = 'BAL'
+	df.loc[df['PossessionTeam'] == 'CLV', 'PossessionTeam'] = 'CLE'
+	df.loc[df['PossessionTeam'] == 'ARZ', 'PossessionTeam'] = 'ARI'
+	df.loc[df['PossessionTeam'] == 'HST', 'PossessionTeam'] = 'HOU'
+
+	# change yardline to be distance to the goal
+	df.loc[df['PossessionTeam'] == df['FieldPosition'], 'YardLine'] = 100 - df['YardLine']
+
+	# convert categorical variable to numbers
 	columns = df.columns
 	for col in columns:
 		if df[col].dtype == 'object':
 			df[col] = pd.factorize(df[col])[0]
-
-	# normalize
-
-	# flip so all going in same direction
 
 
 	######### feature selection V1, top 10 based on F-value between label/feature for regression tasks #########
@@ -88,16 +99,17 @@ def neural_net(X_train, y_train, X_test, y_test):
 	history = model.fit(X_train, y_train, epochs=100, validation_split = 0.2, verbose=0, callbacks=[early_stop, tfdocs.modeling.EpochDots()])
 	print()
 
-	# hist = pd.DataFrame(history.history)
-	# hist['epoch'] = history.epoch
+	hist = pd.DataFrame(history.history)
+	hist['epoch'] = history.epoch
+	print(hist.tail())
 	# plotter = tfdocs.plots.HistoryPlotter(smoothing_std=2)
 	# plotter.plot({'Basic': history}, metric = "mae")
 	# plt.ylim([0, 10])
 	# plt.ylabel('MAE')
 	# plt.show()
 
-	# print(model.evaluate(X_test, y_test, verbose=2))
-	#
+	print(model.evaluate(X_test, y_test, verbose=2))
+
 	# test_predictions = model.predict(X_test).flatten()
 	#
 	# a = plt.axes(aspect='equal')
@@ -145,7 +157,7 @@ def linear_regression(X_train, y_train, X_test, y_test):
 	print("Fitting...")
 	linreg = LinearRegression().fit(X_train, y_train)
 	test_predictions = linreg.predict(X_test).flatten()
-	
+
 	print(test_predictions)
 
 	# a = plt.axes(aspect='equal')
@@ -157,7 +169,7 @@ def linear_regression(X_train, y_train, X_test, y_test):
 	# plt.ylim(lims)
 	# plt.plot(lims, lims)
 	# plt.show()
-	
+
 	# error = test_predictions - y_test
 	# plt.hist(error, bins = 25)
 	# plt.xlabel("Prediction Error")
@@ -169,10 +181,13 @@ def linear_regression(X_train, y_train, X_test, y_test):
 
 def train_my_model(train_df):
 
-	# cross validation split
+	## Train test split
 	X = train_df
 	y = train_df.pop('Yards')
-	X_train, X_test, y_train, y_test = train_test_split(X, y)
+	X_columns = X.columns
+	X = pd.DataFrame(StandardScaler().fit_transform(X), columns=X_columns) # normalize X
+
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 
 	## AVIs MODEL --> ADABOOST ##
 	adaboost_model = adaboost(X_train, y_train)
