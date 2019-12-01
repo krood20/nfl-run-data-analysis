@@ -94,51 +94,86 @@ def preprocess(df):
 
 ## BILLY ##
 def neural_net(X_train, y_train, X_test, y_test):
-	model = build_neural_net_model(X_train)
-	early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10) # prevents overfitting
-	history = model.fit(X_train, y_train, epochs=100, validation_split = 0.2, verbose=0, callbacks=[early_stop, tfdocs.modeling.EpochDots()])
-	print()
+    model = build_neural_net_model(X_train)
+    early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10) # prevents overfitting
+    history = model.fit(X_train, y_train, epochs=100, validation_split = 0.2, verbose=0, callbacks=[early_stop, tfdocs.modeling.EpochDots()])
+    print()
 
-	hist = pd.DataFrame(history.history)
-	hist['epoch'] = history.epoch
-	print(hist.tail())
-	# plotter = tfdocs.plots.HistoryPlotter(smoothing_std=2)
-	# plotter.plot({'Basic': history}, metric = "mae")
-	# plt.ylim([0, 10])
-	# plt.ylabel('MAE')
-	# plt.show()
+    hist = pd.DataFrame(history.history)
+    hist['epoch'] = history.epoch
+    print(hist.tail())
+    # plotter = tfdocs.plots.HistoryPlotter(smoothing_std=2)
+    # plotter.plot({'Basic': history}, metric = "mae")
+    # plt.ylim([0, 10])
+    # plt.ylabel('MAE')
+    # plt.show()
 
-	print(model.evaluate(X_test, y_test, verbose=2))
+    print(model.evaluate(X_test, y_test, verbose=2))
 
-	# test_predictions = model.predict(X_test).flatten()
-	#
-	# a = plt.axes(aspect='equal')
-	# plt.scatter(y_test, test_predictions)
-	# plt.xlabel('True Values')
-	# plt.ylabel('Predictions')
-	# lims = [0, 50]
-	# plt.xlim(lims)
-	# plt.ylim(lims)
-	# plt.plot(lims, lims)
-	# plt.show()
-	#
-	# error = test_predictions - y_test
-	# plt.hist(error, bins = 25)
-	# plt.xlabel("Prediction Error")
-	# plt.ylabel("Count")
-	# plt.show()
-	return model
+    test_predictions = model.predict(X_test).flatten()
+
+    a = plt.axes(aspect='equal')
+    plt.scatter(y_test, test_predictions)
+    plt.title("NN")
+    plt.xlabel('True Values')
+    plt.ylabel('Predictions')
+    lims = [0, 50]
+    plt.xlim(lims)
+    plt.ylim(lims)
+    plt.plot(lims, lims)
+    # plt.show()
+
+    error = test_predictions - y_test
+    plt.hist(error, bins = 25)
+    plt.title("NN")
+    plt.xlabel("Prediction Error")
+    plt.ylabel("Count")
+    # plt.show()
+    return model
 
 ## KYLE ##
-def random_forest(X_train, y_train):
+def random_forest(X_train, y_train, X_test, y_test):
 	#set up our Forest
-	print("Fitting...")
-	rf = RandomForestRegressor(n_estimators = 100)
-	start = time.time()
-	rf.fit(X_train, y_train)
-	end = time.time()
-	print("Time to fit: " + str(end-start))
-	return rf
+    print("Fitting...")
+    rf = RandomForestRegressor(n_estimators = 100)
+    start = time.time()
+    rf.fit(X_train, y_train)
+    end = time.time()
+    print("Time to fit: " + str(end-start))
+
+    #get features importances
+    # importance_list = rf.feature_importances_
+    #
+    # most_important = rf.feature_importances_
+    # most_important.sort()
+    # most_important = most_important[-2:]
+    # print("Most important features")
+    # print(most_important)
+    # print(importance_list.index(most_important[0]), importance_list.index(most_important[1]))
+
+    #predictions
+    test_predictions = rf.predict(X_test)
+
+    #testing a bit
+    a = plt.axes(aspect='equal')
+    plt.title("Random Forest")
+    plt.scatter(y_test, test_predictions)
+    plt.xlabel('True Values')
+    plt.ylabel('Predictions')
+    lims = [0, 50]
+    plt.xlim(lims)
+    plt.ylim(lims)
+    plt.plot(lims, lims)
+    # plt.show()
+
+    error = test_predictions - y_test
+    plt.hist(error, bins = 25)
+    plt.title("Random Forest")
+    plt.xlabel("Prediction Error")
+    plt.ylabel("Count")
+    # plt.show()
+
+    return rf
 
 ## AVI ##
 def adaboost(X_train, y_train):
@@ -154,29 +189,30 @@ def adaboost(X_train, y_train):
 
 ## SURAJ ##
 def linear_regression(X_train, y_train, X_test, y_test):
-	print("Fitting...")
-	linreg = LinearRegression().fit(X_train, y_train)
-	test_predictions = linreg.predict(X_test).flatten()
+    print("Fitting...")
+    linreg = LinearRegression().fit(X_train, y_train)
+    test_predictions = linreg.predict(X_test).flatten()
+    print(test_predictions)
 
-	print(test_predictions)
+    a = plt.axes(aspect='equal')
+    plt.scatter(y_test, test_predictions)
+    plt.title("LinReg")
+    plt.xlabel('True Values')
+    plt.ylabel('Predictions')
+    lims = [0, 50]
+    plt.xlim(lims)
+    plt.ylim(lims)
+    plt.plot(lims, lims)
+    # plt.show()
 
-	# a = plt.axes(aspect='equal')
-	# plt.scatter(y_test, test_predictions)
-	# plt.xlabel('True Values')
-	# plt.ylabel('Predictions')
-	# lims = [0, 50]
-	# plt.xlim(lims)
-	# plt.ylim(lims)
-	# plt.plot(lims, lims)
-	# plt.show()
+    error = test_predictions - y_test
+    plt.hist(error, bins = 25)
+    plt.title("LinReg")
+    plt.xlabel("Prediction Error")
+    plt.ylabel("Count")
+    # plt.show()
 
-	# error = test_predictions - y_test
-	# plt.hist(error, bins = 25)
-	# plt.xlabel("Prediction Error")
-	# plt.ylabel("Count")
-	# plt.show()
-
-	return linreg
+    return linreg
 
 
 def train_my_model(train_df):
@@ -196,7 +232,7 @@ def train_my_model(train_df):
 	neural_net_model = neural_net(X_train, y_train, X_test, y_test)
 
 	## KYLEs MODEL --> RANDY FOREST ##
-	forest_model = random_forest(X_train, y_train)
+	forest_model = random_forest(X_train, y_train, X_test, y_test)
 
 	## SURAJs MODEL --> LINEAR ##
 	linreg_model = linear_regression(X_train, y_train, X_test, y_test)
