@@ -1,7 +1,7 @@
 import time
 import re
+import math
 
-# from kaggle.competitions import nflrush
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -35,11 +35,13 @@ def build_neural_net_model(dataset):
   model.compile(loss='mse', optimizer=tf.keras.optimizers.RMSprop(0.001), metrics=['mae', 'mse'])
   return model
 
-
+#Preprocess our
 def preprocess(df):
-
 	# originally has data for every player during every play, in the intrest of simplicity use only info about the rusher
 	df = df.loc[df['NflId'] == df['NflIdRusher']]
+	df = df.loc[df['Yards'] < 5]
+	df = df.loc[df['Yards'] >= 0]
+
 	df = df.dropna()
 	df = df.reset_index(drop=True)
 
@@ -90,7 +92,18 @@ def preprocess(df):
 	# top_features.remove('GameId')
 	# top_features.remove('PlayId')
 
-	return df[top_features]
+    #split our processed data into train and test
+	processed_df = df[top_features]
+	X = processed_df
+	y = processed_df.pop('Yards')
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=30)
+
+	#put em back together
+	train = pd.concat([X_train, y_train.reindex(X_train.index)], axis=1)
+	test = pd.concat([X_test, y_test.reindex(X_test.index)], axis=1)
+
+	return (train, test)
+
 
 ## BILLY ##
 def neural_net(X_train, y_train, X_test, y_test):
@@ -112,24 +125,25 @@ def neural_net(X_train, y_train, X_test, y_test):
 
     test_predictions = model.predict(X_test).flatten()
 
-    a = plt.axes(aspect='equal')
-    plt.scatter(y_test, test_predictions)
-    plt.title("NN")
-    plt.xlabel('True Values')
-    plt.ylabel('Predictions')
-    lims = [0, 50]
-    plt.xlim(lims)
-    plt.ylim(lims)
-    plt.plot(lims, lims)
-    # plt.show()
-
-    error = test_predictions - y_test
-    plt.hist(error, bins = 25)
-    plt.title("NN")
-    plt.xlabel("Prediction Error")
-    plt.ylabel("Count")
-    # plt.show()
+    # a = plt.axes(aspect='equal')
+    # plt.scatter(y_test, test_predictions)
+    # plt.title("NN")
+    # plt.xlabel('True Values')
+    # plt.ylabel('Predictions')
+    # lims = [0, 50]
+    # plt.xlim(lims)
+    # plt.ylim(lims)
+    # plt.plot(lims, lims)
+    # # plt.show()
+	#
+    # error = test_predictions - y_test
+    # plt.hist(error, bins = 25)
+    # plt.title("NN")
+    # plt.xlabel("Prediction Error")
+    # plt.ylabel("Count")
+    # # plt.show()
     return model
+
 
 ## KYLE ##
 def random_forest(X_train, y_train, X_test, y_test):
@@ -155,25 +169,26 @@ def random_forest(X_train, y_train, X_test, y_test):
     test_predictions = rf.predict(X_test)
 
     #testing a bit
-    a = plt.axes(aspect='equal')
-    plt.title("Random Forest")
-    plt.scatter(y_test, test_predictions)
-    plt.xlabel('True Values')
-    plt.ylabel('Predictions')
-    lims = [0, 50]
-    plt.xlim(lims)
-    plt.ylim(lims)
-    plt.plot(lims, lims)
-    # plt.show()
-
-    error = test_predictions - y_test
-    plt.hist(error, bins = 25)
-    plt.title("Random Forest")
-    plt.xlabel("Prediction Error")
-    plt.ylabel("Count")
+    # a = plt.axes(aspect='equal')
+    # plt.title("Random Forest")
+    # plt.scatter(y_test, test_predictions)
+    # plt.xlabel('True Values')
+    # plt.ylabel('Predictions')
+    # lims = [0, 50]
+    # plt.xlim(lims)
+    # plt.ylim(lims)
+    # plt.plot(lims, lims)
+    # # plt.show()
+	#
+    # error = test_predictions - y_test
+    # plt.hist(error, bins = 25)
+    # plt.title("Random Forest")
+    # plt.xlabel("Prediction Error")
+    # plt.ylabel("Count")
     # plt.show()
 
     return rf
+
 
 ## AVI ##
 def adaboost(X_train, y_train):
@@ -194,22 +209,22 @@ def linear_regression(X_train, y_train, X_test, y_test):
     test_predictions = linreg.predict(X_test).flatten()
     print(test_predictions)
 
-    a = plt.axes(aspect='equal')
-    plt.scatter(y_test, test_predictions)
-    plt.title("LinReg")
-    plt.xlabel('True Values')
-    plt.ylabel('Predictions')
-    lims = [0, 50]
-    plt.xlim(lims)
-    plt.ylim(lims)
-    plt.plot(lims, lims)
+    # a = plt.axes(aspect='equal')
+    # plt.scatter(y_test, test_predictions)
+    # plt.title("LinReg")
+    # plt.xlabel('True Values')
+    # plt.ylabel('Predictions')
+    # lims = [0, 50]
+    # plt.xlim(lims)
+    # plt.ylim(lims)
+    # plt.plot(lims, lims)
     # plt.show()
-
-    error = test_predictions - y_test
-    plt.hist(error, bins = 25)
-    plt.title("LinReg")
-    plt.xlabel("Prediction Error")
-    plt.ylabel("Count")
+	#
+    # error = test_predictions - y_test
+    # plt.hist(error, bins = 25)
+    # plt.title("LinReg")
+    # plt.xlabel("Prediction Error")
+    # plt.ylabel("Count")
     # plt.show()
 
     return linreg
@@ -223,7 +238,8 @@ def train_my_model(train_df):
 	X_columns = X.columns
 	X = pd.DataFrame(StandardScaler().fit_transform(X), columns=X_columns) # normalize X
 
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=30)
 
 	## AVIs MODEL --> ADABOOST ##
 	adaboost_model = adaboost(X_train, y_train)
@@ -240,23 +256,61 @@ def train_my_model(train_df):
 	#each one of us will return a model
 	return (linreg_model, forest_model, adaboost_model, neural_net_model)
 
-def make_my_predictions(test_df, sample_prediction_df):
-	#
+
+def test_model(df, linreg_model, forest_model, adaboost_model, neural_net_model):
+	correct_labels = np.array(df.pop('Yards'))
+
+	columns = df.columns
+	df = pd.DataFrame(StandardScaler().fit_transform(df), columns=columns) # normalize X
+
+	# Linear regression
+	linreg_preds = linreg_model.predict(df).flatten()
+
+	# Random forest
+	randy_preds = forest_model.predict(df).flatten()
+
+	# Adaboost
+	ada_preds = adaboost_model.predict(df).flatten()
+
+	# Neural Net Predictions
+	neural_net_preds = neural_net_model.predict(df).flatten()
+
+
+	# Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived and so dedicated, can long endure. We are met on a great battle-field of that war. We have come to dedicate a portion of that field, as a final resting place for those who here gave their lives that that nation might live. It is altogether fitting and proper that we should do this. But, in a larger sense, we can not dedicate—we can not consecrate—we can not hallow—this ground. The brave men, living and dead, who struggled here, have consecrated it, far above our poor power to add or detract. The world will little note, nor long remember what we say here, but it can never forget what they did here. It is for us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus far so nobly advanced. It is rather for us to be here dedicated to the great task remaining before us—that from these honored dead we take increased devotion to that cause for which they gave the last full measure of devotion—that we here highly resolve that these dead shall not have died in vain—that this nation, under God, shall have a new birth of freedom—and that government of the people, by the people, for the people, shall not perish from the earth. —Abraham Lincoln
+
+	# Stacc the data
+	staccs = np.stack((linreg_preds, randy_preds, ada_preds, neural_net_preds), axis = 1)
+	avg = np.mean(staccs, axis=1)
+
+    # get the error of each prediction
+	print('resutls')
+	print(avg)
+	print('correct')
+	print(correct_labels)
+	print('error')
+	errors = abs(avg - correct_labels)
+	print(errors)
+	print('average error')
+	print(np.mean(errors))
+
+	plt.title("Accuracy vs. Test")
+	plt.xlabel("test")
+	plt.ylabel("accuracy")
+	plt.plot(range(len(errors)), errors)
+	plt.show()
+
 	return
 
 
 
-# env = nflrush.make_env()
 
 # Training data is in the competition dataset as usual
 df = pd.read_csv('../nfl-big-data-bowl-2020/train.csv', low_memory=False)
 
-train_df = preprocess(df)
+train_df, test_df = preprocess(df)
+
+print(train_df)
 
 linreg_model, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
 
-# for (test_df, sample_prediction_df) in env.iter_test():
-#   predictions_df = make_my_predictions(test_df, sample_prediction_df)
-#   env.predict(predictions_df)
-#
-# env.write_submission_file()
+test_model(test_df, linreg_model, forest_model, adaboost_model, neural_net_model)
