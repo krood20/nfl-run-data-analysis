@@ -302,11 +302,11 @@ def test_model(df, linreg_model, forest_model, adaboost_model, neural_net_model)
 	return
 
 
-def visualizations(train_df):
+def visualizations(df):
 
 
 	# speed vs yards
-	df_speed_yards = train_df[train_df["NflIdRusher"] == train_df["NflId"]].loc[:,['GameId', 'DisplayName', 'S', 'Yards']]
+	df_speed_yards = df[df["NflIdRusher"] == df["NflId"]].loc[:,['GameId', 'DisplayName', 'S', 'Yards']]
 
 	plt.scatter(df_speed_yards["Yards"], df_speed_yards["S"], s=0.4)
 	plt.title('Speed to Yards')
@@ -314,7 +314,7 @@ def visualizations(train_df):
 	plt.ylabel('Speed (yards/second)')
 	plt.show()
 
-	df_accel_yards = train_df[train_df["NflIdRusher"] == train_df["NflId"]].loc[:,['GameId', 'DisplayName', 'A', 'Yards']]
+	df_accel_yards = df[train_df["NflIdRusher"] == df["NflId"]].loc[:,['GameId', 'DisplayName', 'A', 'Yards']]
 
 	plt.scatter(df_accel_yards["Yards"], df_accel_yards["A"], s=0.4)
 	plt.title('Acceleration to Yards')
@@ -323,13 +323,26 @@ def visualizations(train_df):
 	plt.show()
 
 
+def histogram_visualization(df):
+
+	hist_df = df[['Yards']].copy()
+
+	hist_df.hist(bins=40)
+	plt.title('Histogram of Yards to Plays')
+	plt.xlabel('Bins')
+	plt.show()
+
+
+
 
 # Training data is in the competition dataset as usual
 df = pd.read_csv('../nfl-big-data-bowl-2020/train.csv', low_memory=False)
 
 train_df, test_df = preprocess(df)
 
-visualizations(df)
+# visualizations(df)
+
+histogram_visualization(df)
 
 # print(train_df)
 
