@@ -7,14 +7,17 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import tensorflow as tf
+import plotly as py
+import plotly.express as px
+import plotly.graph_objs as go
 
 from tensorflow import keras
 from tensorflow.keras import layers
 
 # pip install -q git+https://github.com/tensorflow/docs
-import tensorflow_docs as tfdocs
-import tensorflow_docs.plots
-import tensorflow_docs.modeling
+# import tensorflow_docs as tfdocs
+# import tensorflow_docs.plots
+# import tensorflow_docs.modeling
 
 from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.linear_model import LinearRegression
@@ -299,6 +302,26 @@ def test_model(df, linreg_model, forest_model, adaboost_model, neural_net_model)
 	return
 
 
+def visualizations(train_df):
+
+
+	# speed vs yards
+	df_speed_yards = train_df[train_df["NflIdRusher"] == train_df["NflId"]].loc[:,['GameId', 'DisplayName', 'S', 'Yards']]
+
+	plt.scatter(df_speed_yards["Yards"], df_speed_yards["S"], s=0.4)
+	plt.title('Speed to Yards')
+	plt.xlabel('Yards')
+	plt.ylabel('Speed (yards/second)')
+	plt.show()
+
+	df_accel_yards = train_df[train_df["NflIdRusher"] == train_df["NflId"]].loc[:,['GameId', 'DisplayName', 'A', 'Yards']]
+
+	plt.scatter(df_accel_yards["Yards"], df_accel_yards["A"], s=0.4)
+	plt.title('Acceleration to Yards')
+	plt.xlabel('Yards')
+	plt.ylabel('Acceleration (yards^2/second)')
+	plt.show()
+
 
 
 # Training data is in the competition dataset as usual
@@ -306,8 +329,10 @@ df = pd.read_csv('../nfl-big-data-bowl-2020/train.csv', low_memory=False)
 
 train_df, test_df = preprocess(df)
 
-print(train_df)
+visualizations(df)
 
-linreg_model, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
+# print(train_df)
 
-test_model(test_df, linreg_model, forest_model, adaboost_model, neural_net_model)
+# linreg_model, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
+
+# test_model(test_df, linreg_model, forest_model, adaboost_model, neural_net_model)
