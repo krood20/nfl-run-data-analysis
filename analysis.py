@@ -319,7 +319,7 @@ def visualizations(train_df):
 	plt.scatter(df_accel_yards["Yards"], df_accel_yards["A"], s=0.4)
 	plt.title('Acceleration to Yards')
 	plt.xlabel('Yards')
-	plt.ylabel('Acceleration (yards^2/second)')
+	plt.ylabel('Acceleration (yards/second^2)')
 	plt.show()
 
 
