@@ -342,12 +342,12 @@ df = pd.read_csv('../nfl-big-data-bowl-2020/train.csv', low_memory=False)
 
 train_df, test_df = preprocess(df)
 
-# visualizations(df)
+visualizations(df)
 
 histogram_visualization(df)
 
-# print(train_df)
+print(train_df)
 
-# linreg_model, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
+linreg_model, forest_model, adaboost_model, neural_net_model = train_my_model(train_df)
 
-# test_model(test_df, linreg_model, forest_model, adaboost_model, neural_net_model)
+test_model(test_df, linreg_model, forest_model, adaboost_model, neural_net_model)
