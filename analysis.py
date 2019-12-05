@@ -35,15 +35,17 @@ def build_neural_net_model(dataset):
 	layers.Dense(64, activation='relu'),
 	layers.Dense(1)
   ])
-  model.compile(loss='mse', optimizer=tf.keras.optimizers.RMSprop(0.001), metrics=['mae', 'mse'])
+  model.compile(loss='mse', optimizer=tf.keras.optimizers.RMSprop(0.001), metrics=['mae'])
   return model
 
 #Preprocess our
 def preprocess(df):
 	# originally has data for every player during every play, in the intrest of simplicity use only info about the rusher
 	df = df.loc[df['NflId'] == df['NflIdRusher']]
-	df = df.loc[df['Yards'] < 5]
-	df = df.loc[df['Yards'] >= 0]
+
+	# remove outliers (see report)
+	# df = df.loc[df['Yards'] < 5]
+	# df = df.loc[df['Yards'] >= 0]
 
 	df = df.dropna()
 	df = df.reset_index(drop=True)
@@ -85,15 +87,15 @@ def preprocess(df):
 
 
 	##################################### feature selection V2, intuition #####################################
-	top_features = ['S', 'A', 'Orientation', 'Dir', 'NflId', 'YardLine', 'Down',
-		'Distance', 'OffenseFormation', 'OffensePersonnel', 'DefendersInTheBox',
-		'DefensePersonnel', 'PlayerHeight', 'PlayerWeight', 'PlayerBirthDate', 'Yards']
+	# top_features = ['A', 'Orientation', 'Dir', 'NflId', 'YardLine', 'Down',
+	# 	'Distance', 'OffenseFormation', 'OffensePersonnel', 'DefendersInTheBox',
+	# 	'DefensePersonnel', 'PlayerHeight', 'PlayerWeight', 'PlayerBirthDate', 'Yards']
 
 
 	######################################## feature selection V3, all ########################################
-	# top_features = list(df.columns)
-	# top_features.remove('GameId')
-	# top_features.remove('PlayId')
+	top_features = list(df.columns)
+	top_features.remove('GameId')
+	top_features.remove('PlayId')
 
     #split our processed data into train and test
 	processed_df = df[top_features]
@@ -293,10 +295,10 @@ def test_model(df, linreg_model, forest_model, adaboost_model, neural_net_model)
 	print('average error')
 	print(np.mean(errors))
 
-	plt.title("Accuracy vs. Test")
-	plt.xlabel("test")
-	plt.ylabel("accuracy")
-	plt.plot(range(len(errors)), errors)
+	plt.title("Error vs. Prediction")
+	plt.xlabel("Predictions")
+	plt.ylabel("Error")
+	plt.scatter(range(len(errors)), errors, s=0.5)
 	plt.show()
 
 	return
